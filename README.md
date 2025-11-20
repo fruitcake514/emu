@@ -1,3 +1,7 @@
+AI Prompt
+i want a electron app front end that can run on linux thath allows me to one click run MS-DOS and Win3.x games without any configuration as archive.org does with their emulator. if possible i want to utilize ExoDOS dos games and win3.x game collection. heres a starting place
+AI Prompt 2
+i dont want to install windows 3.x is it possible to use https://github.com/db48x/emularity or dosbox pure. I want to use https://github.com/exoscoriae/eXoDOS and https://github.com/exoscoriae/eXoWin3x with very minimal set up to just run and play games
 # eXoDOS/eXoWin3x Launcher with Emularity
 
 Complete Electron app that uses Archive.org's Emularity system (same as their web player) to run eXoDOS and eXoWin3x games with zero configuration.
