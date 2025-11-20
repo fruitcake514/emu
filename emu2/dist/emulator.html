@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Emularity Player</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            font-family: system-ui;
+            color: #fff;
+        }
+
+        #canvas {
+            max-width: 100%;
+            max-height: 80vh;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+
+        #status {
+            margin: 20px;
+            text-align: center;
+        }
+
+        .loading {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="status" class="loading">Loading game...</div>
+    <canvas id="canvas"></canvas>
+
+    <script src="emularity/es6-promise.js"></script>
+    <script src="emularity/browserfs.min.js"></script>
+    <script src="emularity/loader.js"></script>
+    <script>
+        // Get game info from URL params
+        const params = new URLSearchParams(window.location.search);
+        const gameData = JSON.parse(decodeURIComponent(params.get('game')));
+
+        document.getElementById('status').textContent = `Loading ${gameData.title || 'game'}...`;
+
+        // Initialize Emularity with eXoDOS game
+        async function loadGame() {
+            try {
+                console.log("Starting game load...");
+                // Get all game files
+                const files = await window.electronAPI.listGameFiles(gameData.gamePath);
+                console.log(`Found ${files.length} files`);
+
+                // Prepare loader arguments
+                const loaderArgs = [
+                    DosBoxLoader.emulatorJS("emulators/wdosbox.js"),
+                    DosBoxLoader.emulatorWASM("emulators/wdosbox.wasm"),
+                    DosBoxLoader.nativeResolution(640, 480),
+                    DosBoxLoader.startExe(gameData.startCommand || "DIR.EXE")
+                ];
+
+                // Load and mount each file
+                for (const file of files) {
+                    console.log(`Reading file: ${file.name}`);
+                    const content = await window.electronAPI.readGameFile(file.path);
+
+                    // Convert base64 to Uint8Array
+                    const binaryString = atob(content);
+                    const bytes = new Uint8Array(binaryString.length);
+                    for (let i = 0; i < binaryString.length; i++) {
+                        bytes[i] = binaryString.charCodeAt(i);
+                    }
+
+                    // Mount the file
+                    // Note: file.name is relative path from game dir
+                    loaderArgs.push(
+                        DosBoxLoader.mountFile(file.name, DosBoxLoader.localFile(file.name, bytes))
+                    );
+                }
+
+                console.log("Configuring emulator...");
+                // Configure emulator
+                const emulator = new Emulator(
+                    document.querySelector("#canvas"),
+                    null,
+                    new DosBoxLoader(...loaderArgs)
+                );
+                console.log("Starting emulator...");
+                emulator.start();
+                document.getElementById('status').style.display = 'none';
+
+            } catch (err) {
+                console.error("Failed to load game:", err);
+                document.getElementById('status').textContent = `Error: ${err.message}`;
+            }
+        }
+
+        loadGame();
+    </script>
+</body>
+
+</html>
