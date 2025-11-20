@@ -1,7 +1,7 @@
 # eXoDOS/eXoWin3x Launcher with Emularity
 
 Complete Electron app that uses Archive.org's Emularity system (same as their web player) to run eXoDOS and eXoWin3x games with zero configuration.
-
+https://github.com/Voljega/ExoDOSConverter
 ## Quick Setup
 
 1. Download eXoDOS v6 and/or eXoWin3x v2 from retro-exo.com
